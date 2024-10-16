@@ -28,13 +28,12 @@ def main_loop(window: WeatherWindow, display: WeatherDisplay):
 
 def main():
     # TODO: this logic will need to live in a seperate thread so the ui can still be responsive
-    weather_collector = Collector(apis=[OWMWeatherAPI()])
-
     db = SqliteWeatherDB()
+    weather_collector = Collector(apis=[OWMWeatherAPI()], weather_db=db)
+
     window = WeatherWindow(
         start_date=datetime.now() - timedelta(hours=100),
         end_date=datetime.now(),
-        weather_db=db,
         weather_collector=weather_collector
     )
 

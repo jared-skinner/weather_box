@@ -1,16 +1,14 @@
 from collector import Collector
 from datetime import datetime, timedelta
-from interfaces import WeatherDB
 from weather_structs import Measurement, Summary
 from utils import round_datetime_to_nearest_hour
 
 class WeatherWindow:
-    def __init__(self, start_date: datetime, end_date: datetime, weather_db: WeatherDB, weather_collector: Collector) -> None:
+    def __init__(self, start_date: datetime, end_date: datetime, weather_collector: Collector) -> None:
         self.start_date: datetime = round_datetime_to_nearest_hour(start_date)
         self.end_date: datetime = round_datetime_to_nearest_hour(end_date)
         self.high: float
         self.low: float
-        self.weather_db = weather_db
         self.weather_collector = weather_collector
 
         self.measurement_window: dict[datetime, Measurement] = self.load_window()
@@ -51,14 +49,7 @@ class WeatherWindow:
         window: dict[datetime, Measurement] = {}
         measurement_date: datetime = self.start_date
         while measurement_date <= self.end_date:
-            # try to get measurement from db
-            try:
-                # TODO: we want to check our cache, but if we can't find it there, we want to pull from the APIs
-                window[measurement_date] = self.weather_db.get_measurement(measurement_date)
-            except:
-                window[measurement_date] = self.weather_collector.get_measurement(measurement_date)
-                self.weather_db.store_measurement(measurement_date, window[measurement_date])
-                
+            window[measurement_date] = self.weather_collector.get_measurement(measurement_date)
             measurement_date = measurement_date + timedelta(hours=1)
 
         return window
